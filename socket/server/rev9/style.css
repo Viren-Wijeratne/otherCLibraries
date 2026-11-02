@@ -1,0 +1,22 @@
+body{
+    background-color: black;
+    display:flex;
+    flex-direction:column;
+    border:2px solid #00ff80;
+    /*text-align:center;*/
+    background-color: black;
+    color:#03fcb1;
+    margin:1px;
+    min-height: 100vh;
+}
+
+table{
+    border:2px solid #00ff80;
+    margin:5px;
+    width:100%;
+}
+
+td{
+    padding-left: 20px;
+
+}

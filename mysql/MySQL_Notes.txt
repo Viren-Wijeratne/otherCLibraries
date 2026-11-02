@@ -1,0 +1,220 @@
+
+//MySQL is a relational database that stores data in tables and have relationships between them
+//MySQL is case-insenstive
+//MySQL commands:
+
+    CREATE DATABASE mydb;                   //Creates a new database called "mydb"
+    DROP DATABASE mydb;                     //Removes database called "mydb"
+    USE mydb;                               //Set the database to be used. Does the same thing as setting the default schema
+    ALTER DATABASE mydb READ ONLY = 1;      //Setting the database to readonly
+
+
+    //Create a table called "employees"
+    CREATE TABLE employees (                //Create a table called "employees"
+        employee_id INT,                    //Adding columns of the table, employee_id will store int type
+        first_name VARCHAR(50),             //VARCHAR(number_of_max_charaters)
+        last_name VARCHAR(50),
+        hourly_pay DECIMAL(5, 2),           //DECIMAL(amount_of_digits, precision_upto)
+        hire_date DATE
+    );
+
+
+    SELECT * FROM employees;                //Select all from table "employees" and show
+    RENAME TABLE employees TO workers;      //Rename the table
+    DROP TABLE employees;                   //Remove table "employees"
+
+
+    ALTER TABLE employees ADD phone_number VARCHAR(15);                 //Adding a column to an existing table called "phone_number"
+    ALTER TABLE employees RENAME COLUMN phone_number TO email;          //Rename column "phone_number" to "email"
+    ALTER TABLE employees MODIFY COLUMN email VARCHAR(100);             //Modify the data type of email column
+    ALTER TABLE employees MODIFY email VARCHARS(100) AFTER last_name;   //Reposition the "email" column to come after the "last_name" column in the table
+    ALTER TABLE employees MODIFY email VARCHARS(100) FIRST;             //Reposition the "email" column to come at the beginning
+    ALTER TABLE employees DROP COLUMN email;                            //Removes the "email" column
+
+    //Adding rows to the table
+    INSERT INTO employees VALUES (1, "Eugene", "Krabs", 25.50, "2023-02-01");       //The data included within the paranthesis should coincide data type of that column
+
+    //Adding multiple rows at once
+    INSERT INTO employees
+    VALUES  (2, "Squidward", "Tentacles", 15.00, "2023-01-03"),         //Overview ..VALUES (), (), (), ();
+            (3, "Spongebob", "Squarepants", 12.50, "2023-01-04"),
+            (4, "Patrick", "Star", 12.50, "2023-01-05"),
+            (5, "Sandy", "Cheeks", 17.25, "2023-01-06");        //Should end with a semicolon;
+
+    //Adding data to rows by omiting several information for certain columns
+    INSERT INTO employees (employee_id, first_name, last_name) VALUES (6, "Sheldon", "Plankton");       //columns hourly_pay and hire_date will not be occupied (null)
+
+    //Querying specific data from the database
+    SELECT * FROM employees;                                    //Returns the all the columns of the table
+    SELECT first_name, last_name FROM employees;                //Returns the first_name and last_name columns from the table
+    SELECT * FROM employees WHERE employee_id = 3;              //Returns the row that contains the employee_id 3, this can be used to search any row element
+    SELECT * FROM employees WHERE hourly_pay >= 15;             //Returns the rows that contain hourly_pay greater than 15
+    SELECT * FROM employees WHERE hire_date <= "2023-01-03";    //Returns the rows that contain employees hired on or before 2023-01-03
+    SELECT * FROM employees WHERE employee_id != 1;             //Returns the rows that do not contain the employee_id 1
+    SELECT * FROM employees WHERE hire_date IS NULL;            //Returns the rows that does not have any data (null) on the "hire_date" column
+    SELECT * FROM employees WHERE hire_date IS NOT NULL;        //Returns the rows that are not null on the "hire_date" column
+
+    //Updating a table
+    UPDATE employees SET hourly_pay = 10.25 WHERE employee_id = 6;                              //Update the column; hourly_pay of the row containing; employee_id 6
+    UPDATE employees SET hourly_pay = 10.50, hire_date = "2023-01-07" WHERE employee_id = 6;    //Update the columns; hourly_pay and hire_date of the row containing; employee_id 6
+    UPDATE employees SET hourly_pay = NULL WHERE employee_id = 6;                               //Remove the data in column; hourly_pay of the row containing; employee_id 6
+    UPDATE employees SET hourly_pay = NULL;                                                     //This will effect the whole tables hourly_pay column, replacing the data with NULL
+
+    //Deleting rows from the table
+    DELETE FROM employees WHERE employee_id = 6;        //Delete the row containing employee_id 3, the WHERE clause is important
+    DELETE FROM employees;                              //This will delete the all the rows from the table [DON'T DO THIS!!!]
+
+==================================================================================================================================================================================================
+
+//AUTOCOMMIT, COMMIT and ROLLBACK;
+//Turning off auto commit will make some kind of save point (like git commit), this is a state where you can undo what you have done before (as in not saving a file with a mistake, so you undo it before you save it)
+
+    SET AUTOCOMMIT = OFF;       //Turn off AUTOCOMMIT
+    ROLLBACK;                   //When you want to rollback a change to the database before a commit (Suppose you accidently do "DELETE FROM employees" without a WHERE clause, to undo before commiting we can use ROLLBACK)
+    COMMIT;                     //Commit to the table (Similar to saving) No rollbacks after the commit
+
+
+    INSERT INTO test VALUES (CURRENT_DATE(), CURRENT_TIME(), NOW());             //Adding current date, time and date&time into table "test" with columns my_date, my_time, my_datetime
+    INSERT INTO test VALUES (CURRENT_DATE() + 1, CURRENT_TIME() + 1, NULL);     //Adding next date and time + 1sec The next day or previous days can be set using +1 and -1 respectively. Applicable to the other functions as well
+
+
+//UNIQUE Constraint is something that prevent duplicate entries in a specified column, Consider the following example;
+    CREATE TABLE products(
+                        product_id INT,
+                        product_name VARCHAR(25) UNIQUE,
+                        price DECIMAL(5, 2));
+
+    INSERT INTO products VALUES (100, "hamburger", 3.99),
+                                (101, "fries", 1.89),
+                                (102, "soda", 1.00),
+                                (103, "ice cream", 1.49),
+                                (104, "fries", 1.79);
+    //As there is a UNIQUE Constraint used in the product_name column MySQL will throwup an error in creating "fries" as an entry already exists. It prevents duplication of data
+
+    ALTER TABLE products ADD CONSTRAINT UNIQUE(product_name);       //Add the UNIQUE Constraint to the product_name column, after column creation
+
+//NOT NULL Constraint prevents a specified column to be not NULL
+    CREATE TABLE products(
+                        product_id INT,
+                        product_name VARCHAR(25) UNIQUE,
+                        price DECIMAL(5, 2)) NOT NULL;
+
+    INSERT INTO products VALUES (100, "hamburger", 3.99),
+                                (101, "fries", 1.89),
+                                (102, "soda", 1.00),
+                                (103, "ice cream", 1.49),
+                                (104, "cookie", NULL);
+    //This will throwup an error stating that the price column cannot be set to NULL
+
+    ALTER TABLE products MODIFY price DECIMAL(4, 2) NOT NULL;       //Add the NOT NULL Constraint to the price column, after column creation
+
+//CHECK Constraint is used to check if certain criteria a met when adding table entries
+    CREATE TABLE employees (
+        employee_id INT,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        hourly_pay DECIMAL(5, 2),
+        hire_date DATE,
+        CONSTRAINT chk_hourly_pay CHECK (hourly_pay >= 10.00)       //Suppose the minimum employees wage is 10.00, so if some entry is added which is below 10.00 an error will be generated
+    );
+    //The CHECK constraint can be given a name for easy reference in the future if any changes need to be done, for this we use the CONSTRAINT and the name of the CHECK as "chk_hourly_pay"
+
+    ALTER TABLE employees ADD CONSTARAINT chk_hourly_pay CHECK(hourly_pay >= 10.00);    //Add the CHECK constraint to the hourly_pay column, after column creation
+    ALTER TABLE employees DROP CHECK chk_hourly_pay;                                    //Remove the CHECK constraint from the employees table
+
+//DEFAULT Constraint is used to set a default value such that in the case of no specific value is set, this default value will be set
+    ALTER TABLE products ALTER price SET DEFAULT 0;         //If the value of price is not defined set it to 0.00
+
+    INSERT INTO products (product_id, product_name) VALUES (104, "straw"),
+                                                           (105, "napkin"),
+                                                           (106, "fork"),
+                                                           (107, "spoon");
+    //Each of the above entries will have a default price of 0.00
+    //Below is another example using the DEFAULT constraint
+
+    CREATE TABLE transactions(
+                             transaction_id INT,
+                             amount DECIMAL(5, 2),
+                             transaction_date DATETIME DEFAULT NOW()
+                             );
+    //This will create a table called transactions which the transaction_date will be filled automatically with each entry
+
+//PRIMARY KEY constraint is used to setup a column that cannot be null and should always have values that are unique. There can only be one primary key for a table
+
+    CREATE TABLE transactions(
+                            transaction_id INT PRIMARY KEY,
+                            amount DECIMAL(5, 2)
+                            );
+    //The transaction_id column contains the PRIMARY KEY constraint which allows only unique entries and it cannot be null
+
+    ALTER TABLE transactions ADD CONSTARAINT PRIMARY KEY(transaction_id);       //Set the PRIMARY KEY constraint after the column is created
+
+
+//AUTO_INCREMENT attribute can be used on a column that is set as a KEY, when ever we insert a new row our PRIMARY KEY will be populated automatically, Then each subsequent row is auto incremented
+
+    CREATE TABLE transactions(
+                        transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+                        amount DECIMAL(5, 2)
+                    );
+    //the transaction_id will start from 1 and automatically increment for each row
+
+    INSERT INTO transactions(amount) VALUES (4.99),
+                                            (3.50);
+    //Here only the amount is added as the transaction_id will be added automatically starting from 1
+
+    ALTER TABLE transactions AUTO_INCREMENT = 1000;     //Start incrementing using 1000 as the first value, the next transaction will be 1002 and so on...
+
+==================================================================================================================================================================================================
+
+//Foreign Keys - A PRIMARY KEY from one table that can be found within a different table. Using a foreign key we can establish connection between two tables
+    When the a foreign key constraint is made that would create a link between two tables, which would prevent any actions that would destroy the link between them
+    So for foreign keys to work there should be two or more tables, that would have similar columns
+
+    eg: Suppose a there are two tables;
+    Table1 transactions -   transaction_id (PRIMARY KEY)
+                            amount
+                            customer_id (Foreign Key)
+
+    Table2 customers    -   customer_id (PRIMARY KEY)
+                            first_name
+                            last_name
+
+    CREATE TABLE customers(
+                customer_id INT PRIMARY KEY AUTO_INCREMENT,
+                first_name VARCHAR(50),
+                last_name VARCHAR(50),
+    );
+
+    CREATE TABLE transactions (
+                transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+                amount DECIMAL(5, 2),
+                customer_id INT,
+                FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+    );
+    //This will create a foreign key constaraint for the customer_id column of the transactions and link to the customer_id of the customers table
+    //Any foreign keys of a table can be found within the side panel under foreign keys tab of a table, if not speacified the server will assign a name for created foreign key. This name is useful in making further changes after the foreign key is created
+
+    ALTER TABLE transactions DROP FOREIGN KEY transactions_ibfk_1;                                                          //This will drop the foreign key
+    ALTER TABLE transactions FOREIGN KEY (customer_id) REFERENCES customers(customer_id)                                    //Created foreign keys with the default anme given by the server
+    ALTER TABLE transactions ADD CONSTRAINT fk_customer_id FOREIGN KEY (customer_id) REFERENCES customers(customer_id)      //Created foreign keys with the name fk_customer_id
+
+So now suppose we populate the customers table, and if we then try to do something like DELETE FROM customers WHERE customer_id=3; we are not allowed to do this unless we drop the foreign key
+
+//Joins in MySQL
+A join is a clause that is used to combine rows of two or more tables based on a related column between them such as a foreign key
+We can think of it as a two sets in a venn diagram that has a common area. So we assign tables to left side set and another table to right side set and there is common data field where the two sets intersect, these are called left joins, right joins and inner joins respectively. So ultimately joins is a method used as a data parsing method for ease of use
+
+    SELECT * FROM transactions INNER JOIN customers ON transactions.customer_id = customers.customer_id;
+    //This will give an output that has transactions table with all its content on the left and customers table with all its content on the right. So basically we have an output that has both tables joint with all the fields from each table. So entry that does not share data with both that tables will be excluded from the output(Inner join)(transactions n customers)
+
+    SELECT transaction_id, amount, first_name, last_name FROM transactions INNER JOIN customers ON transactions.customer_id = customers.customer_id;
+    //This shows the only the transaction_id, amount, first_name, last_name from the above joint table (Inner join)
+
+    SELECT * FROM transactions LEFT JOIN customers ON transactions.customer_id = customers.customer_id;
+    //This will pull up all the data from the left table(transactions) and join that with only any relavent data that has an intersection with the right table(customers) (transactions U customers')
+
+     SELECT * FROM transactions RIGHT JOIN customers ON transactions.customer_id = customers.customer_id;
+    //This will pull up all the data from the right table(customers) and join that with only any relavent data that has an intersection with the left table(transactions) (transactions' U customers)
+    //In other words we will display all the data from the right table and if there are any matches pull up any rows from the left table
+
+
